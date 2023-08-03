@@ -22,15 +22,21 @@ export class AlbStack extends cdk.Stack {
       value: this.vpc.vpcArn,
     });  
 
-
+/*  Setting up the alb  ***/
+/* switc this to a nlb
     const alb = new elbv2.ApplicationLoadBalancer(this, 'alb', {
+      vpc: this.vpc,
+      internetFacing: true,
+    });*/
+
+    const nlb = new elbv2.NetworkLoadBalancer(this, 'nlb', {
       vpc: this.vpc,
       internetFacing: true,
     });
 
-    const listener = alb.addListener('Listener', {
+    const listener = nlb.addListener('Listener', {
       port: 80,
-      open: true,
+      //open: true,
     });
 
     const userData = ec2.UserData.forLinux();
@@ -67,7 +73,7 @@ export class AlbStack extends cdk.Stack {
       },
     });
 
-    listener.addAction('/static', {
+    /*listener.addAction('/static', {
       priority: 5,
       conditions: [elbv2.ListenerCondition.pathPatterns(['/static'])],
       action: elbv2.ListenerAction.fixedResponse(200, {
@@ -75,7 +81,7 @@ export class AlbStack extends cdk.Stack {
         messageBody: '<h1>Static ALB Response</h1>',
       }),
     });
-
+*/
     asg.scaleOnRequestCount('request-per-minute', {
       targetRequestsPerMinute: 60,
     });
@@ -85,8 +91,8 @@ export class AlbStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'albDNS', {
-      value: alb.loadBalancerDnsName,
+      value: nlb.loadBalancerDnsName,
     });  
-    */
+    
   }
 }
