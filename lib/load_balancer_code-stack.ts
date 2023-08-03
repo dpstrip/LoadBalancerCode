@@ -34,10 +34,18 @@ export class LoadBalancerCodeStack extends cdk.Stack {
 
   }
 
+  //this adds the targets to the LB.  The target/arg1 needs to be an object not a string.
   addTargets(listener: elb.ApplicationListener, arg1: string) {
     listener.addTargets('AppTargets', {
       port: 80,
-      
+     // targets:
+
+      healthCheck:{
+        path: '/',
+        unhealthyThresholdCount: 2,
+        healthyThresholdCount: 5,
+        interval: cdk.Duration.seconds(30),
+      },
     })
   }
   
