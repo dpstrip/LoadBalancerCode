@@ -66,7 +66,7 @@ export class AlbStack extends cdk.Stack {
       priority: 5,
       conditions: [elbv2.ListenerCondition.pathPatterns(['/static'])],
       action: elbv2.ListenerAction.fixedResponse(200, {
-        contentType: 'test/html',
+        contentType: 'text/html',
         messageBody: '<h1>Static ALB Response</h1>',
       }),
     });
