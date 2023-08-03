@@ -5,6 +5,7 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as cdk from 'aws-cdk-lib/core';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
 import { AutoScalingAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import * as avpc from './vpc-stack';
 
 
 export class AlbStack extends cdk.Stack {
@@ -14,9 +15,13 @@ export class AlbStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    this.vpc = ec2.Vpc.fromLookup(this, 'myVPC', {
-      vpcId: 'vpc-0c7031dc1166c9526'
-    });
+    this.vpc = new avpc.VpcFindA(this, 'vpc-0c7031dc1166c9526').vpc;
+
+
+    new cdk.CfnOutput(this, 'vpc', {
+      value: this.vpc.vpcArn,
+    });  
+
 
     const alb = new elbv2.ApplicationLoadBalancer(this, 'alb', {
       vpc: this.vpc,
@@ -82,5 +87,6 @@ export class AlbStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'albDNS', {
       value: alb.loadBalancerDnsName,
     });  
+    */
   }
 }
