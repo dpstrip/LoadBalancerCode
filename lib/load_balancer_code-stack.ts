@@ -30,7 +30,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
 const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
   vpc: this.localVpc,
   loadBalancerName: 'NLB',
-  internetFacing: false,
+  internetFacing: true,
 });
 
 
@@ -62,17 +62,18 @@ const userData = ec2.UserData.forLinux();
     //this creates the listener
     const listener = nlb.addListener('Listener',{
       port: 80,
+
     })
     //This creates the target for the listener
     listener.addTargets('default-targer', {
       port: 80,
       targets: [asg],
-      healthCheck: {
-        path: '/',
-        unhealthyThresholdCount: 2,
-        healthyThresholdCount: 2,
-        interval: cdk.Duration.seconds(30),
-      },
+      //healthCheck: {
+       // path: '/',
+       // unhealthyThresholdCount: 2,
+       // healthyThresholdCount: 2,
+       // interval: cdk.Duration.seconds(30),
+      //},
     });
 
 /*
