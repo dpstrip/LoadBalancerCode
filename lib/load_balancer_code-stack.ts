@@ -23,6 +23,14 @@ export class LoadBalancerCodeStack extends cdk.Stack {
     
     //validation that I have it
     new cdk.CfnOutput(this, 'VPC', {value: this.localVpc.vpcArn});
+
+//I need to create a NLB
+const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
+  vpc: this.localVpc,
+  loadBalancerName: 'NLB',
+  internetFacing: false,
+});
+
 /*
     //create SG for ALB
     this.ALBSecurityGroup = this.CreateALBSecurityGroup();
