@@ -1,4 +1,4 @@
-
+/*
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -6,6 +6,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
 import { AutoScalingAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as avpc from './vpc-stack';
+
 
 
 export class AlbStack extends cdk.Stack {
@@ -21,13 +22,13 @@ export class AlbStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'vpc', {
       value: this.vpc.vpcArn,
     });  
-
+*/
 /*  Setting up the alb  ***/
 /* switc this to a nlb
     const alb = new elbv2.ApplicationLoadBalancer(this, 'alb', {
       vpc: this.vpc,
       internetFacing: true,
-    });*/
+    });
 
     const nlb = new elbv2.NetworkLoadBalancer(this, 'nlb', {
       vpc: this.vpc,
@@ -81,7 +82,7 @@ export class AlbStack extends cdk.Stack {
         messageBody: '<h1>Static ALB Response</h1>',
       }),
     });
-*/
+
     asg.scaleOnRequestCount('request-per-minute', {
       targetRequestsPerMinute: 60,
     });
@@ -93,6 +94,6 @@ export class AlbStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'albDNS', {
       value: nlb.loadBalancerDnsName,
     });  
-    
+    */
   }
 }

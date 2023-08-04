@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
   "app": "npx ts-node --prefer-ts-exts bin/load_balancer_code.ts",
-=======
-  "app": "npx ts-node --prefer-ts-exts bin/alb.ts",
->>>>>>> 360bb3b5eaff1bbd7228b11288e8285fb95eb3fb
   "watch": {
     "include": [
       "**"

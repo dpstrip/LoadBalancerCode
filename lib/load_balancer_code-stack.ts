@@ -19,11 +19,11 @@ export class LoadBalancerCodeStack extends cdk.Stack {
     super(scope, id, props);
 
     //lookup vpc object
-    this.localVpc = ec2.Vpc.fromLookup(this, "VPC", {vpcId: this.vpcId});
+    this.localVpc = ec2.Vpc.fromLookup(this, "VPC1", {vpcId: this.vpcId});
     
     //validation that I have it
     new cdk.CfnOutput(this, 'VPC', {value: this.localVpc.vpcArn});
-
+/*
     //create SG for ALB
     this.ALBSecurityGroup = this.CreateALBSecurityGroup();
     //create alb
@@ -84,5 +84,6 @@ export class LoadBalancerCodeStack extends cdk.Stack {
     });
     //securityGroup.addEgressRule(ec2.Peer.anyIpv4(), new ec2.Port.tcp(443));
     return securityGroup;
+    */
   }
 }
