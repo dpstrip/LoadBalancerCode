@@ -1,8 +1,15 @@
 {
+<<<<<<< HEAD
   "name": "load_balancer_code",
   "version": "0.1.0",
   "bin": {
     "load_balancer_code": "bin/load_balancer_code.js"
+=======
+  "name": "alb",
+  "version": "0.1.0",
+  "bin": {
+    "alb": "bin/alb.js"
+>>>>>>> 360bb3b5eaff1bbd7228b11288e8285fb95eb3fb
   },
   "scripts": {
     "build": "tsc",
@@ -12,15 +19,26 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
+<<<<<<< HEAD
     "@types/node": "20.1.7",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "aws-cdk": "2.82.0",
+=======
+    "@types/node": "20.1.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "aws-cdk": "2.79.1",
+>>>>>>> 360bb3b5eaff1bbd7228b11288e8285fb95eb3fb
     "ts-node": "^10.9.1",
     "typescript": "~5.0.4"
   },
   "dependencies": {
+<<<<<<< HEAD
     "aws-cdk-lib": "2.82.0",
+=======
+    "aws-cdk-lib": "2.79.1",
+>>>>>>> 360bb3b5eaff1bbd7228b11288e8285fb95eb3fb
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
   }
