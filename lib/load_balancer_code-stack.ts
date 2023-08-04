@@ -26,9 +26,12 @@ export class LoadBalancerCodeStack extends cdk.Stack {
     //validation that I have it
     new cdk.CfnOutput(this, 'VPC', {value: this.localVpc.vpcArn});
 
+   // const subnetsPublic = this.localVpc.selectSubnets({subnetType: SubnetType.Public}).subnets;
+
 //I need to create a NLB
 const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
   vpc: this.localVpc,
+  vpcSubnets:{subnetType: ec2.SubnetType.PUBLIC},
   loadBalancerName: 'NLB',
   internetFacing: true,
 });
@@ -67,13 +70,8 @@ const userData = ec2.UserData.forLinux();
     //This creates the target for the listener
     listener.addTargets('default-targer', {
       port: 80,
-      targets: [asg],
-      //healthCheck: {
-       // path: '/',
-       // unhealthyThresholdCount: 2,
-       // healthyThresholdCount: 2,
-       // interval: cdk.Duration.seconds(30),
-      //},
+      protocol:elb.Protocol.TCP_UDP,
+      targets: [asg]
     });
 
 /*
