@@ -3,6 +3,8 @@ import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elb from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { addListener } from 'process';
+import { AutoScalingAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
 
 
 export class LoadBalancerCodeStack extends cdk.Stack {
@@ -30,6 +32,48 @@ const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
   loadBalancerName: 'NLB',
   internetFacing: false,
 });
+
+
+//** create autoscalling group of ec2 boxes that have a sinple website on it */
+  //this is def of website
+const userData = ec2.UserData.forLinux();
+    userData.addCommands(
+      'sudo su',
+      'yum install -y httpd',
+      'systemctl start httpd',
+      'systemctl enable httpd',
+      'echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html',
+    );
+    //this is the asg
+    const asg = new autoscaling.AutoScalingGroup(this, 'asg', {
+      vpc: this.localVpc,
+      instanceType: ec2.InstanceType.of(
+        ec2.InstanceClass.BURSTABLE2,
+        ec2.InstanceSize.MICRO,
+      ),
+      machineImage: new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+      }),
+      userData: userData,
+      minCapacity: 2,
+      maxCapacity: 3,
+    });
+
+    //this creates the listener
+    const listener = nlb.addListener('Listener',{
+      port: 80,
+    })
+    //This creates the target for the listener
+    listener.addTargets('default-targer', {
+      port: 80,
+      targets: [asg],
+      healthCheck: {
+        path: '/',
+        unhealthyThresholdCount: 2,
+        healthyThresholdCount: 2,
+        interval: cdk.Duration.seconds(30),
+      },
+    });
 
 /*
     //create SG for ALB
