@@ -25,7 +25,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
     
     //validation that I have it
     new cdk.CfnOutput(this, 'VPC', {value: this.localVpc.vpcArn});
-
+// I need to find the subnets to I want the NLB and ec2 to load balance on.
    // const subnetsPublic = this.localVpc.selectSubnets({subnetType: SubnetType.Public}).subnets;
 
 //I need to create a NLB
@@ -60,6 +60,7 @@ const userData = ec2.UserData.forLinux();
       userData: userData,
       minCapacity: 2,
       maxCapacity: 3,
+      vpcSubnets:{subnetType: ec2.SubnetType.PUBLIC},
     });
 
     //this creates the listener
