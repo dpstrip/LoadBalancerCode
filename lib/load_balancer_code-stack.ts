@@ -5,6 +5,7 @@ import * as elb from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { addListener } from 'process';
 import { AutoScalingAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 
 export class LoadBalancerCodeStack extends cdk.Stack {
@@ -28,25 +29,26 @@ export class LoadBalancerCodeStack extends cdk.Stack {
 // I need to find the subnets to I want the NLB and ec2 to load balance on.
    // const subnetsPublic = this.localVpc.selectSubnets({subnetType: SubnetType.Public}).subnets;
 
-//I need to create a NLB
-const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
-  vpc: this.localVpc,
-  vpcSubnets:{subnetType: ec2.SubnetType.PUBLIC},
-  loadBalancerName: 'NLB',
-  internetFacing: true,
-});
+
 
 
 //** create autoscalling group of ec2 boxes that have a sinple website on it */
   //this is def of website
 const userData = ec2.UserData.forLinux();
     userData.addCommands(
+      '#!/bin/bash',
       'sudo su',
       'yum install -y httpd',
       'systemctl start httpd',
       'systemctl enable httpd',
       'echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html',
     );
+
+    //Assing role to SSH into box
+    const role = iam.Role.fromRoleArn(this, 'Role', 'arn:aws:iam::929556976395:role/MyVpcStack-publicserverrole8FFFECE1-1DGGBRY2CWWSR', {mutable: false});
+    //find the existing Security Group
+    const sg = ec2.SecurityGroup.fromSecurityGroupId(this, 'SecurityGroupImport', 'sg-04e06db3f2fd709f7',{})
+
     //this is the asg
     const asg = new autoscaling.AutoScalingGroup(this, 'asg', {
       vpc: this.localVpc,
@@ -61,8 +63,20 @@ const userData = ec2.UserData.forLinux();
       minCapacity: 2,
       maxCapacity: 3,
       vpcSubnets:{subnetType: ec2.SubnetType.PUBLIC},
+      role: role,
+      securityGroup: sg
     });
 
+/****
+//I need to create a NLB
+const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
+  vpc: this.localVpc,
+  vpcSubnets:{subnetType: ec2.SubnetType.PUBLIC},
+  loadBalancerName: 'NLB',
+  internetFacing: true,
+});
+
+    
     //this creates the listener
     const listener = nlb.addListener('Listener',{
       port: 80,
