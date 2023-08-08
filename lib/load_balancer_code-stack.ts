@@ -46,8 +46,21 @@ const userData = ec2.UserData.forLinux();
 
     //Assing role to SSH into box
     const role = iam.Role.fromRoleArn(this, 'Role', 'arn:aws:iam::929556976395:role/MyVpcStack-publicserverrole8FFFECE1-1DGGBRY2CWWSR', {mutable: false});
-    //find the existing Security Group
-    const sg = ec2.SecurityGroup.fromSecurityGroupId(this, 'SecurityGroupImport', 'sg-035961de8bcf9f8ba',{})
+    //find the existing Security Group.  Issue is that I am not picking up the secuity group that I want.  I had to create another one.
+   // const sg = ec2.SecurityGroup.fromSecurityGroupId(this, 'SecurityGroupImport', 'sg-035961de8bcf9f8ba',{})
+
+    //Create a SG for the EC2 instances to take inboud http requests
+    const ec2InstanceSG = new ec2.SecurityGroup(this, 'ec2-LB-SG',{
+      vpc: this.localVpc
+    });
+
+    ec2InstanceSG.addIngressRule(
+      ec2.Peer.ipv4('3.0.0.0/8'),
+      ec2.Port.tcp(80),
+      'Allow http traffic from Sparx'
+    );
+
+
 
     //this is the asg
     const asg = new autoscaling.AutoScalingGroup(this, 'asg', {
@@ -64,10 +77,10 @@ const userData = ec2.UserData.forLinux();
       maxCapacity: 3,
       vpcSubnets:{subnetType: ec2.SubnetType.PUBLIC},
       role: role,
-      securityGroup: sg
+      securityGroup: ec2InstanceSG
     });
 
-/****
+
 //I need to create a NLB
 const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
   vpc: this.localVpc,
