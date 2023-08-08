@@ -47,7 +47,7 @@ const userData = ec2.UserData.forLinux();
     //Assing role to SSH into box
     const role = iam.Role.fromRoleArn(this, 'Role', 'arn:aws:iam::929556976395:role/MyVpcStack-publicserverrole8FFFECE1-1DGGBRY2CWWSR', {mutable: false});
     //find the existing Security Group
-    const sg = ec2.SecurityGroup.fromSecurityGroupId(this, 'SecurityGroupImport', 'sg-04e06db3f2fd709f7',{})
+    const sg = ec2.SecurityGroup.fromSecurityGroupId(this, 'SecurityGroupImport', 'sg-035961de8bcf9f8ba',{})
 
     //this is the asg
     const asg = new autoscaling.AutoScalingGroup(this, 'asg', {
