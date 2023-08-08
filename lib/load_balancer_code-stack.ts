@@ -41,6 +41,7 @@ const nlb = new elb.NetworkLoadBalancer(this, 'nlb', {
   //this is def of website
 const userData = ec2.UserData.forLinux();
     userData.addCommands(
+      '#!/bin/bash',
       'sudo su',
       'yum install -y httpd',
       'systemctl start httpd',
