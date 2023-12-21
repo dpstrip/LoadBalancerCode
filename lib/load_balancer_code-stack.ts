@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elb from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as elbtargets from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { addListener } from 'process';
 
 
@@ -12,6 +13,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
   public localVpc: ec2.IVpc;
   public LoadBalancer: elb.ApplicationLoadBalancer;
   public listener: elb.ApplicationListener;
+  public anEC2: ec2.Instance;
 
 
 
@@ -26,6 +28,8 @@ export class LoadBalancerCodeStack extends cdk.Stack {
 
     //create SG for ALB
     this.ALBSecurityGroup = this.CreateALBSecurityGroup();
+
+    this.anEC2 = this.createEC2s();
     //create alb
     this.LoadBalancer = this.addLoadBalancer();
     //create listener rule
@@ -34,20 +38,51 @@ export class LoadBalancerCodeStack extends cdk.Stack {
 
   }
 
+  //create a ec2 server to put in target
+  createEC2s(): cdk.aws_ec2.Instance {
+      const sg = new ec2.SecurityGroup(this, 'SG', {
+        vpc: this.localVpc,
+        allowAllOutbound: true
+      });
+      sg.addIngressRule(ec2.Peer.anyIpv4(),ec2.Port.tcp(22),'SSH');
+      sg.addIngressRule(ec2.Peer.anyIpv4(),ec2.Port.tcp(80),'HTTP');
+
+      return new ec2.Instance(this, 'MyInstance', 
+      {
+        vpc: this.localVpc,
+        instanceType: new ec2.InstanceType('t2.micro'),
+        machineImage: new ec2.AmazonLinuxImage(),
+        securityGroup: sg
+      });
+  }
+
+  createTargetGroup():cdk.aws_elasticloadbalancingv2.ApplicationTargetGroup{
+    return new elb.ApplicationTargetGroup(this, 'myTargetGroup',{
+      vpc: this.localVpc,
+      port:80,
+      targets:[new elbtargets.InstanceIdTarget(this.anEC2.instanceId)]
+    });
+
+  }
   //this adds the targets to the LB.  The target/arg1 needs to be an object not a string.
   addTargets(listener: elb.ApplicationListener, arg1: string) {
+
+    let myTargets = this.createTargetGroup();
     listener.addTargets('AppTargets', {
       port: 80,
      // targets:
-
-      healthCheck:{
+        healthCheck:{
         path: '/',
         unhealthyThresholdCount: 2,
         healthyThresholdCount: 5,
         interval: cdk.Duration.seconds(30),
       },
     })
+    listener.addAction('DefaultAction', {
+      action: elb.ListenerAction.forward([myTargets])
+    });
   }
+
   
   
   createListener(): elb.ApplicationListener{
@@ -57,6 +92,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
     })
   }
 
+ 
 
   addLoadBalancer(): cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer {
     const alb = new elb.ApplicationLoadBalancer(this, 'alb', {
