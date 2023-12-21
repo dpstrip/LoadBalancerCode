@@ -7,7 +7,7 @@ import { addListener } from 'process';
 
 export class LoadBalancerCodeStack extends cdk.Stack {
 
-  private readonly vpcId = 'vpc-0e6be85a4258eb935';
+  private readonly vpcId = 'vpc-0e7a7fc9ede3b6bbb';
   public readonly ALBSecurityGroup: ec2.SecurityGroup;
   public localVpc: ec2.IVpc;
   public LoadBalancer: elb.ApplicationLoadBalancer;
@@ -22,7 +22,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
     this.localVpc = ec2.Vpc.fromLookup(this, "VPC", {vpcId: this.vpcId});
     
     //validation that I have it
-    new cdk.CfnOutput(this, 'VPC', {value: this.localVpc.vpcArn});
+    // new cdk.CfnOutput(this, 'VPC', {value: this.localVpc.vpcArn});
 
     //create SG for ALB
     this.ALBSecurityGroup = this.CreateALBSecurityGroup();
