@@ -4,6 +4,8 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elb from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as elbtargets from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { addListener } from 'process';
+import * as S3Assets from 'aws-cdk-lib/aws-s3-assets';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 
 export class LoadBalancerCodeStack extends cdk.Stack {
@@ -47,12 +49,38 @@ export class LoadBalancerCodeStack extends cdk.Stack {
       sg.addIngressRule(ec2.Peer.anyIpv4(),ec2.Port.tcp(22),'SSH');
       sg.addIngressRule(ec2.Peer.anyIpv4(),ec2.Port.tcp(80),'HTTP');
 
+      const asset = new S3Assets.Asset(this, 'S3Asset', {
+        path: 'assets/index.js'
+      });
+
+      const userData = ec2.UserData.forLinux();
+      userData.addS3DownloadCommand({
+      region:'us-east-1',
+      bucket: asset.bucket,
+      bucketKey: asset.s3ObjectKey,
+      localFile:'/tmp/index.js'
+    });
+
+    userData.addCommands(
+      'sudo node /tmp/index.js'
+    );
+
+    const webserverRole = new iam.Role(this, 'webserver-role', {
+      assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
+      managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3ReadOnlyAccess'),
+                        iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'),
+                        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')],
+    });
+
+
       return new ec2.Instance(this, 'MyInstance', 
       {
         vpc: this.localVpc,
         instanceType: new ec2.InstanceType('t2.micro'),
         machineImage: new ec2.AmazonLinuxImage(),
-        securityGroup: sg
+        securityGroup: sg,
+        userData,
+        role: webserverRole
       });
   }
 
