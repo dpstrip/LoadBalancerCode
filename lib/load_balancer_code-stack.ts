@@ -48,6 +48,10 @@ export class LoadBalancerCodeStack extends cdk.Stack {
       });
       sg.addIngressRule(ec2.Peer.anyIpv4(),ec2.Port.tcp(22),'SSH');
       sg.addIngressRule(ec2.Peer.anyIpv4(),ec2.Port.tcp(80),'HTTP');
+      sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(80),'HTTP');
+      sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(22),'SSH');
+      sg.addIngressRule(ec2.Peer.ipv4('199.169.204.178/16'),ec2.Port.tcp(22),'SSH');
+      sg.addIngressRule(ec2.Peer.ipv4('199.169.204.178/16'),ec2.Port.tcp(80),'HTTP');
 
       const asset = new S3Assets.Asset(this, 'S3Asset', {
         path: 'assets/index.js'
@@ -76,15 +80,16 @@ export class LoadBalancerCodeStack extends cdk.Stack {
       return new ec2.Instance(this, 'MyInstance', 
       {
         vpc: this.localVpc,
+        vpcSubnets: {
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
         instanceType: new ec2.InstanceType('t2.micro'),
         machineImage: new ec2.AmazonLinuxImage(),
         securityGroup: sg,
         userData,
         role: webserverRole,
         allowAllOutbound:true,
-        vpcSubnets:{
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
-        }
+        keyName:'dps-ec2-1'
       });
   }
 
