@@ -80,7 +80,11 @@ export class LoadBalancerCodeStack extends cdk.Stack {
         machineImage: new ec2.AmazonLinuxImage(),
         securityGroup: sg,
         userData,
-        role: webserverRole
+        role: webserverRole,
+        allowAllOutbound:true,
+        vpcSubnets:{
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+        }
       });
   }
 
