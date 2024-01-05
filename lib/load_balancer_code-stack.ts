@@ -41,7 +41,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
   }
 
   //create a ec2 server to put in target
-  createEC2s(): cdk.aws_ec2.Instance {
+  createEC2s(): ec2.Instance {
       const sg = new ec2.SecurityGroup(this, 'SG', {
         vpc: this.localVpc,
         allowAllOutbound: true
@@ -50,8 +50,11 @@ export class LoadBalancerCodeStack extends cdk.Stack {
       sg.addIngressRule(ec2.Peer.anyIpv4(),ec2.Port.tcp(80),'HTTP');
       sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(80),'HTTP');
       sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(22),'SSH');
+      sg.addIngressRule(ec2.Peer.ipv4('3.80.16.0/29'),ec2.Port.tcp(22),'SSH');
       sg.addIngressRule(ec2.Peer.ipv4('199.169.204.178/16'),ec2.Port.tcp(22),'SSH');
       sg.addIngressRule(ec2.Peer.ipv4('199.169.204.178/16'),ec2.Port.tcp(80),'HTTP');
+      sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(3080),'http');
+      sg.addIngressRule(ec2.Peer.ipv4('199.169.204.178/16'),ec2.Port.tcp(3080), 'http');
 
       const asset = new S3Assets.Asset(this, 'S3Asset', {
         path: 'assets/index.js'
@@ -93,7 +96,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
       });
   }
 
-  createTargetGroup():cdk.aws_elasticloadbalancingv2.ApplicationTargetGroup{
+  createTargetGroup():elb.ApplicationTargetGroup{
     return new elb.ApplicationTargetGroup(this, 'myTargetGroup',{
       vpc: this.localVpc,
       port:80,
@@ -131,7 +134,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
 
  
 
-  addLoadBalancer(): cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer {
+  addLoadBalancer(): elb.ApplicationLoadBalancer {
     const alb = new elb.ApplicationLoadBalancer(this, 'alb', {
       vpc: this.localVpc,
       internetFacing: true
@@ -145,7 +148,7 @@ export class LoadBalancerCodeStack extends cdk.Stack {
   
   
   //Create ALB secuirty group
-  private CreateALBSecurityGroup(): cdk.aws_ec2.SecurityGroup {
+  private CreateALBSecurityGroup(): ec2.SecurityGroup {
     var securityGroup = new ec2.SecurityGroup(this, 'ALBSecurityGroup', {
       vpc: this.localVpc,
       allowAllOutbound: false
