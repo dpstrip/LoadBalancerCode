@@ -51,6 +51,8 @@ export class LoadBalancerCodeStack extends cdk.Stack {
       sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(80),'HTTP');
       sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(22),'SSH');
       sg.addIngressRule(ec2.Peer.ipv4('3.80.16.0/29'),ec2.Port.tcp(22),'SSH');
+      sg.addIngressRule(ec2.Peer.ipv4('13.34.66.0/27'),ec2.Port.tcp(22),'SSH');
+      sg.addIngressRule(ec2.Peer.ipv4('15.230.221.0/24'),ec2.Port.tcp(22),'SSH');
       sg.addIngressRule(ec2.Peer.ipv4('199.169.204.178/16'),ec2.Port.tcp(22),'SSH');
       sg.addIngressRule(ec2.Peer.ipv4('199.169.204.178/16'),ec2.Port.tcp(80),'HTTP');
       sg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'),ec2.Port.tcp(3080),'http');
